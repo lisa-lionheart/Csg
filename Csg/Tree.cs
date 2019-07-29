@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+#nullable enable
 namespace Csg
 {
 	class Tree
@@ -184,7 +184,7 @@ namespace Csg
 					// Nothing to do
 				}
 				else {
-					var _this = node;
+					Node _this = node;
 					var _thisPlane = _this.Plane;
 					if (_thisPlane == null)
 					{
@@ -198,7 +198,9 @@ namespace Csg
 
 					for (int i = 0, n = polygontreenodes.Count; i < n; i++)
 					{
+#pragma warning disable CS8601 // Possible null reference assignment.
 						polygontreenodes[i].SplitByPlane(_thisPlane, ref _this.PolygonTreeNodes, ref backnodes, ref frontnodes, ref backnodes);
+#pragma warning restore CS8601 // Possible null reference assignment.
 					}
 
 					if (frontnodes != null && frontnodes.Count > 0)

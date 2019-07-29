@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+#nullable enable
 namespace Csg
 {
 	public class Solid
@@ -309,7 +309,7 @@ namespace Csg
 			}
 		}
 
-		BoundingBox Bounds
+		public BoundingBox Bounds
 		{
 			get
 			{
