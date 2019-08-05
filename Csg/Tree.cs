@@ -12,7 +12,7 @@ namespace Csg
 
 		public Node RootNode => rootnode;
 
-		public Tree(BoundingBox bbox, List<Polygon> polygons)
+		public Tree(Bounds bbox, List<Polygon> polygons)
 		{
 			polygonTree = new PolygonTreeNode();
 			rootnode = new Node(null);
@@ -244,7 +244,7 @@ namespace Csg
 		Polygon? polygon;
 		bool removed;
 
-		public BoundingBox? BoundingBox => polygon?.BoundingBox;
+		public Bounds? BoundingBox => polygon?.BoundingBox;
 
 		public void AddPolygons(List<Polygon> polygons)
 		{

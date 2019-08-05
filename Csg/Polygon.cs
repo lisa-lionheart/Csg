@@ -20,7 +20,7 @@ namespace Csg
 		static readonly PolygonShared defaultShared = new PolygonShared(null);
 
 		BoundingSphere? cachedBoundingSphere;
-		BoundingBox? cachedBoundingBox;
+		Bounds? cachedBoundingBox;
 
 		public Polygon(List<Vertex> vertices, PolygonShared? shared = null, Plane? plane = null)
 		{
@@ -45,8 +45,8 @@ namespace Csg
 				if (cachedBoundingSphere == null)
 				{
 					var box = BoundingBox;
-					var middle = (box.Min + box.Max) * 0.5f;
-					var radius3 = box.Max - middle;
+					var middle = (box.min + box.max) * 0.5f;
+					var radius3 = box.max - middle;
 					var radius = radius3.magnitude;
 					cachedBoundingSphere = new BoundingSphere { Center = middle, Radius = radius };
 				}
@@ -54,7 +54,7 @@ namespace Csg
 			}
 		}
 
-		public BoundingBox BoundingBox
+		public Bounds BoundingBox
 		{
 			get
 			{
@@ -77,9 +77,11 @@ namespace Csg
 						minpoint = Vector3.Min(minpoint, point);
 						maxpoint = Vector3.Max(maxpoint, point);
 					}
-					cachedBoundingBox = new BoundingBox(minpoint, maxpoint);
+                    Vector3 size = maxpoint - minpoint;
+                    Vector3 center = (minpoint + maxpoint) / 2;
+                    cachedBoundingBox = new Bounds(center, size);
 				}
-				return cachedBoundingBox;
+                return (Bounds)cachedBoundingBox;
 			}
 		}
 

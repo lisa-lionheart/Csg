@@ -17,7 +17,7 @@ namespace Csg
 		public const int DefaultResolution2D = 32;
 		public const int DefaultResolution3D = 12;
 
-		BoundingBox? cachedBoundingBox;
+		Bounds? cachedBoundingBox;
 
 		public Solid ()
 		{
@@ -308,7 +308,7 @@ namespace Csg
 			}
 		}
 
-		public BoundingBox Bounds
+		public Bounds Bounds
 		{
 			get
 			{
@@ -324,17 +324,19 @@ namespace Csg
 						var bounds = polygon.BoundingBox;
 						if (i == 0)
 						{
-							minpoint = bounds.Min;
-							maxpoint = bounds.Max;
+							minpoint = bounds.min;
+							maxpoint = bounds.max;
 						}
 						else {
-							minpoint = Vector3.Min(minpoint, bounds.Min);
-							maxpoint = Vector3.Max(maxpoint, bounds.Max);
+							minpoint = Vector3.Min(minpoint, bounds.min);
+							maxpoint = Vector3.Max(maxpoint, bounds.max);
 						}
-					}
-					cachedBoundingBox = new BoundingBox(minpoint, maxpoint);
-				}
-				return cachedBoundingBox;
+                    }
+                    Vector3 size = maxpoint - minpoint;
+                    Vector3 center = (minpoint + maxpoint) / 2;
+                    cachedBoundingBox = new Bounds(center, size);
+                }
+				return (Bounds)cachedBoundingBox;
 			}
 		}
 
@@ -348,12 +350,12 @@ namespace Csg
 			{
 				var mybounds = Bounds;
 				var otherbounds = csg.Bounds;
-				if (mybounds.Max.x < otherbounds.Min.x) return false;
-				if (mybounds.Min.x > otherbounds.Max.x) return false;
-				if (mybounds.Max.y < otherbounds.Min.y) return false;
-				if (mybounds.Min.y > otherbounds.Max.y) return false;
-				if (mybounds.Max.z < otherbounds.Min.z) return false;
-				if (mybounds.Min.z > otherbounds.Max.z) return false;
+				if (mybounds.max.x < otherbounds.min.x) return false;
+				if (mybounds.min.x > otherbounds.max.x) return false;
+				if (mybounds.max.y < otherbounds.min.y) return false;
+				if (mybounds.min.y > otherbounds.max.y) return false;
+				if (mybounds.max.z < otherbounds.min.z) return false;
+				if (mybounds.min.z > otherbounds.max.z) return false;
 				return true;
 			}
 		}

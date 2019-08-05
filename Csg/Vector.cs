@@ -1,6 +1,6 @@
 ﻿using System;
 using UnityEngine;
-
+#nullable enable
 namespace Csg
 {
 
@@ -46,41 +46,16 @@ namespace Csg
         }
     }
 
-	public class BoundingBox
+	public class BoundsUtil
 	{
-		public readonly Vector3 Min;
-		public readonly Vector3 Max;
-		public BoundingBox(Vector3 min, Vector3 max)
-		{
-			Min = min;
-			Max = max;
+
+		public static Bounds FromMinMax(Vector3 min, Vector3 max) {
+
+	        Vector3 Size = max - min;
+		    Vector3 Center = (min + max) / 2;
+            return new Bounds(Center, Size);
 		}
-		public BoundingBox At(Vector3 position, Vector3 size)
-		{
-			return new BoundingBox(position, position + size);
-		}
-		public BoundingBox(float dx, float dy, float dz)
-		{
-			Min = new Vector3(-dx / 2, -dy / 2, -dz / 2);
-			Max = new Vector3(dx / 2, dy / 2, dz / 2);
-		}
-		public Vector3 Size => Max - Min;
-		public Vector3 Center => (Min + Max) / 2;
-		public static BoundingBox operator +(BoundingBox a, Vector3 b)
-		{
-			return new BoundingBox(a.Min + b, a.Max + b);
-		}
-		public bool Intersects(BoundingBox b)
-		{
-			if (Max.x < b.Min.x) return false;
-			if (Max.y < b.Min.y) return false;
-			if (Max.z < b.Min.z) return false;
-			if (Min.x > b.Max.x) return false;
-			if (Min.y > b.Max.y) return false;
-			if (Min.z > b.Max.z) return false;
-			return true;
-		}
-		public override string ToString() => $"{Center}, s={Size}";
+
 	}
 
 	public class BoundingSphere
