@@ -5,6 +5,8 @@ using System.Diagnostics;
 using static Csg.Solids;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
+using UnityEngine;
+using Debug = System.Diagnostics.Debug;
 
 namespace Csg.PerfTest
 {
@@ -13,8 +15,8 @@ namespace Csg.PerfTest
 	{
 		static void PrimeJit()
 		{
-			var sphere1 = Sphere(1000, new Vector3D(-500, 0, 0));
-			var sphere2 = Sphere(1000, new Vector3D(500, 0, 0));
+			var sphere1 = Sphere(1000, new Vector3(-500, 0, 0));
+			var sphere2 = Sphere(1000, new Vector3(500, 0, 0));
 			var sub = Difference(sphere1, sphere2);
 			Debug.Assert(sub.Polygons.Count > 0);
 		}
@@ -33,8 +35,8 @@ namespace Csg.PerfTest
 		static TestResult TestRes(int res)
 		{
 			var st = sw.Elapsed;
-			var sphere1 = Sphere(new SphereOptions { Resolution = res, Radius = 1000, Center = new Vector3D(-500, 0, 0) });
-			var sphere2 = Sphere(new SphereOptions { Resolution = res, Radius = 1000, Center = new Vector3D(500, 0, 0) });
+			var sphere1 = Sphere(new SphereOptions { Resolution = res, Radius = 1000, Center = new Vector3(-500, 0, 0) });
+			var sphere2 = Sphere(new SphereOptions { Resolution = res, Radius = 1000, Center = new Vector3(500, 0, 0) });
 			var sub = Difference(sphere1, sphere2);
 			var et = sw.Elapsed;
 			var subTime = et - st;

@@ -180,29 +180,29 @@ namespace Csg
 			return result;
 		}
 
-		public Solid Translate(Vector3D offset)
+		public Solid Translate(Vector3 offset)
 		{
 			return Transform(Matrix4x4.Translation(offset));
 		}
 
 		public Solid Translate(float x = 0, float y = 0, float z = 0)
 		{
-			return Transform(Matrix4x4.Translation(new Vector3D(x, y, z)));
+			return Transform(Matrix4x4.Translation(new Vector3(x, y, z)));
 		}
 
-		public Solid Scale(Vector3D scale)
+		public Solid Scale(Vector3 scale)
 		{
 			return Transform(Matrix4x4.Scaling(scale));
 		}
 
 		public Solid Scale(float scale)
 		{
-			return Transform(Matrix4x4.Scaling(new Vector3D(scale, scale, scale)));
+			return Transform(Matrix4x4.Scaling(new Vector3(scale, scale, scale)));
 		}
 
 		public Solid Scale(float x, float y, float z)
 		{
-			return Transform(Matrix4x4.Scaling(new Vector3D(x, y, z)));
+			return Transform(Matrix4x4.Scaling(new Vector3(x, y, z)));
 		}
 
 		Solid Canonicalized()
@@ -316,8 +316,8 @@ namespace Csg
 			{
 				if (cachedBoundingBox == null)
 				{
-					var minpoint = new Vector3D(0, 0, 0);
-					var maxpoint = new Vector3D(0, 0, 0);
+					var minpoint = new Vector3(0, 0, 0);
+					var maxpoint = new Vector3(0, 0, 0);
 					var polygons = this.Polygons;
 					var numpolygons = polygons.Count;
 					for (var i = 0; i < numpolygons; i++)
@@ -330,8 +330,8 @@ namespace Csg
 							maxpoint = bounds.Max;
 						}
 						else {
-							minpoint = minpoint.Min(bounds.Min);
-							maxpoint = maxpoint.Max(bounds.Max);
+							minpoint = Vector3.Min(minpoint, bounds.Min);
+							maxpoint = Vector3.Max(maxpoint, bounds.Max);
 						}
 					}
 					cachedBoundingBox = new BoundingBox(minpoint, maxpoint);
@@ -350,12 +350,12 @@ namespace Csg
 			{
 				var mybounds = Bounds;
 				var otherbounds = csg.Bounds;
-				if (mybounds.Max.X < otherbounds.Min.X) return false;
-				if (mybounds.Min.X > otherbounds.Max.X) return false;
-				if (mybounds.Max.Y < otherbounds.Min.Y) return false;
-				if (mybounds.Min.Y > otherbounds.Max.Y) return false;
-				if (mybounds.Max.Z < otherbounds.Min.Z) return false;
-				if (mybounds.Min.Z > otherbounds.Max.Z) return false;
+				if (mybounds.Max.x < otherbounds.Min.x) return false;
+				if (mybounds.Min.x > otherbounds.Max.x) return false;
+				if (mybounds.Max.y < otherbounds.Min.y) return false;
+				if (mybounds.Min.y > otherbounds.Max.y) return false;
+				if (mybounds.Max.z < otherbounds.Min.z) return false;
+				if (mybounds.Min.z > otherbounds.Max.z) return false;
 				return true;
 			}
 		}
@@ -949,9 +949,9 @@ namespace Csg
 		public Vertex LookupOrCreate (ref Vertex vertex)
 		{
 			var key = new Key {
-				X = (int)(vertex.Pos.X * multiplier + 0.5),
-				Y = (int)(vertex.Pos.Y * multiplier + 0.5),
-				Z = (int)(vertex.Pos.Z * multiplier + 0.5),
+				X = (int)(vertex.Pos.x * multiplier + 0.5),
+				Y = (int)(vertex.Pos.y * multiplier + 0.5),
+				Z = (int)(vertex.Pos.z * multiplier + 0.5),
 				U = (int)(vertex.Tex.X * multiplier + 0.5),
 				V = (int)(vertex.Tex.Y * multiplier + 0.5),
 			};
@@ -996,9 +996,9 @@ namespace Csg
 		public Plane LookupOrCreate (Plane plane)
 		{
 			var key = new Key {
-				X = (int)(plane.Normal.X * multiplier + 0.5),
-				Y = (int)(plane.Normal.Y * multiplier + 0.5),
-				Z = (int)(plane.Normal.Z * multiplier + 0.5),
+				X = (int)(plane.Normal.x * multiplier + 0.5),
+				Y = (int)(plane.Normal.y * multiplier + 0.5),
+				Z = (int)(plane.Normal.z * multiplier + 0.5),
 				W = (int)(plane.W * multiplier + 0.5),
 			};
 			if (lookuptable.TryGetValue (key, out var p))

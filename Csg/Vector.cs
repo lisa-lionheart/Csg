@@ -2,134 +2,131 @@
 using UnityEngine;
 
 namespace Csg
-{
-	public struct Vector3D : IEquatable<Vector3D>
+{/*
+	public struct Vector3 : IEquatable<Vector3>
 	{
-		public float X, Y, Z;
+		public float x, y, z;
 
-		public Vector3D(float x, float y, float z)
+		public Vector3(float x, float y, float z)
 		{
-			X = x;
-			Y = y;
-			Z = z;
+			this.x = x;
+			this.y = y;
+			this.z = z;
 		}
 
-		public bool Equals(Vector3D a)
+		public bool Equals(Vector3 a)
 		{
 #pragma warning disable RECS0018 // Comparison of floating point numbers with equality operator
-			return X == a.X && Y == a.Y && Z == a.Z;
+			return x == a.x && y == a.y && z == a.z;
 #pragma warning restore RECS0018 // Comparison of floating point numbers with equality operator
 		}
 
 		public float Length
 		{
-			get { return Mathf.Sqrt(X * X + Y * Y + Z * Z); }
+			get { return Mathf.Sqrt(x * x + y * y + z * z); }
 		}
 
-		public float DistanceToSquared(Vector3D a)
+
+		public float Dot(Vector3 a)
 		{
-			var dx = X - a.X;
-			var dy = Y - a.Y;
-			var dz = Z - a.Z;
-			return dx * dx + dy * dy + dz * dz;
+			return x * a.x + y * a.y + z * a.z;
 		}
 
-		public float Dot(Vector3D a)
+		public Vector3 Cross(Vector3 a)
 		{
-			return X * a.X + Y * a.Y + Z * a.Z;
+			return new Vector3(
+				y * a.z - z * a.y,
+				z * a.x - x * a.z,
+				x * a.y - y * a.x);
 		}
 
-		public Vector3D Cross(Vector3D a)
-		{
-			return new Vector3D(
-				Y * a.Z - Z * a.Y,
-				Z * a.X - X * a.Z,
-				X * a.Y - Y * a.X);
-		}
-
-		public Vector3D Unit
+		public Vector3 Unit
 		{
 			get
 			{
 				var d = Length;
-				return new Vector3D(X / d, Y / d, Z / d);
+				return new Vector3(x / d, y / d, z / d);
 			}
 		}
 
-		public Vector3D Negated
+		public Vector3 Negated
 		{
 			get
 			{
-				return new Vector3D(-X, -Y, -Z);
+				return new Vector3(-x, -y, -z);
 			}
 		}
 
-		public Vector3D Abs
+
+
+		public Vector3 Min(Vector3 other)
 		{
-			get
-			{
-				return new Vector3D(Mathf.Abs(X), Mathf.Abs(Y), Mathf.Abs(Z));
-			}
+			return new Vector3(Mathf.Min(x, other.x), Mathf.Min(y, other.y), Mathf.Min(z, other.z));
 		}
 
-		public Vector3D Min(Vector3D other)
+		public Vector3 Max(Vector3 other)
 		{
-			return new Vector3D(Mathf.Min(X, other.X), Mathf.Min(Y, other.Y), Mathf.Min(Z, other.Z));
+			return new Vector3(Mathf.Max(x, other.x), Mathf.Max(y, other.y), Mathf.Max(z, other.z));
 		}
 
-		public Vector3D Max(Vector3D other)
+		public static Vector3 operator +(Vector3 a, Vector3 b)
 		{
-			return new Vector3D(Mathf.Max(X, other.X), Mathf.Max(Y, other.Y), Mathf.Max(Z, other.Z));
+			return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
 		}
-
-		public static Vector3D operator +(Vector3D a, Vector3D b)
+		public static Vector3 operator -(Vector3 a, Vector3 b)
 		{
-			return new Vector3D(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+			return new Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
 		}
-		public static Vector3D operator -(Vector3D a, Vector3D b)
+		public static Vector3 operator *(Vector3 a, Vector3 b)
 		{
-			return new Vector3D(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+			return new Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
 		}
-		public static Vector3D operator *(Vector3D a, Vector3D b)
+		public static Vector3 operator *(Vector3 a, float b)
 		{
-			return new Vector3D(a.X * b.X, a.Y * b.Y, a.Z * b.Z);
+			return new Vector3(a.x * b, a.y * b, a.z * b);
 		}
-		public static Vector3D operator *(Vector3D a, float b)
+		public static Vector3 operator /(Vector3 a, float b)
 		{
-			return new Vector3D(a.X * b, a.Y * b, a.Z * b);
+			return new Vector3(a.x / b, a.y / b, a.z / b);
 		}
-		public static Vector3D operator /(Vector3D a, float b)
-		{
-			return new Vector3D(a.X / b, a.Y / b, a.Z / b);
-		}
-		public static Vector3D operator *(Vector3D a, Matrix4x4 b)
+		public static Vector3 operator *(Vector3 a, Matrix4x4 b)
 		{
 			return b.LeftMultiply1x3Vector(a);
 		}
 
 		public override string ToString()
 		{
-			return string.Format(System.Globalization.CultureInfo.InvariantCulture, "[{0:0.000}, {1:0.000}, {2:0.000}]", X, Y, Z);
+			return string.Format(System.Globalization.CultureInfo.InvariantCulture, "[{0:0.000}, {1:0.000}, {2:0.000}]", x, y, z);
 		}
 
-		public Vector3D RandomNonParallelVector()
-		{
-			var abs = Abs;
-			if ((abs.X <= abs.Y) && (abs.X <= abs.Z))
-			{
-				return new Vector3D(1, 0, 0);
-			}
-			else if ((abs.Y <= abs.X) && (abs.Y <= abs.Z))
-			{
-				return new Vector3D(0, 1, 0);
-			}
-			else {
-				return new Vector3D(0, 0, 1);
-			}
-		}
-	}
+	}*/
 
-	public struct Vector2D : IEquatable<Vector2D>
+	public static class Vector3Extensions {
+        public static Vector3 Abs(this Vector3 self) {
+                return new Vector3(Mathf.Abs(self.x), Mathf.Abs(self.y), Mathf.Abs(self.z));
+        }
+
+        public static Vector3 RandomNonParallelVector(this Vector3 self) {
+            var abs = self.Abs();
+            if ((abs.x <= abs.y) && (abs.x <= abs.z)) {
+                return new Vector3(1, 0, 0);
+            } else if ((abs.y <= abs.x) && (abs.y <= abs.z)) {
+                return new Vector3(0, 1, 0);
+            } else {
+                return new Vector3(0, 0, 1);
+            }
+        }
+
+
+        public static float DistanceToSquared(this Vector3 rhs, Vector3 a) {
+            var dx = rhs.x - a.x;
+            var dy = rhs.y - a.y;
+            var dz = rhs.z - a.z;
+            return dx * dx + dy * dy + dz * dz;
+        }
+    }
+
+    public struct Vector2D : IEquatable<Vector2D>
 	{
 		public float X, Y;
 
@@ -205,36 +202,36 @@ namespace Csg
 
 	public class BoundingBox
 	{
-		public readonly Vector3D Min;
-		public readonly Vector3D Max;
-		public BoundingBox(Vector3D min, Vector3D max)
+		public readonly Vector3 Min;
+		public readonly Vector3 Max;
+		public BoundingBox(Vector3 min, Vector3 max)
 		{
 			Min = min;
 			Max = max;
 		}
-		public BoundingBox At(Vector3D position, Vector3D size)
+		public BoundingBox At(Vector3 position, Vector3 size)
 		{
 			return new BoundingBox(position, position + size);
 		}
 		public BoundingBox(float dx, float dy, float dz)
 		{
-			Min = new Vector3D(-dx / 2, -dy / 2, -dz / 2);
-			Max = new Vector3D(dx / 2, dy / 2, dz / 2);
+			Min = new Vector3(-dx / 2, -dy / 2, -dz / 2);
+			Max = new Vector3(dx / 2, dy / 2, dz / 2);
 		}
-		public Vector3D Size => Max - Min;
-		public Vector3D Center => (Min + Max) / 2;
-		public static BoundingBox operator +(BoundingBox a, Vector3D b)
+		public Vector3 Size => Max - Min;
+		public Vector3 Center => (Min + Max) / 2;
+		public static BoundingBox operator +(BoundingBox a, Vector3 b)
 		{
 			return new BoundingBox(a.Min + b, a.Max + b);
 		}
 		public bool Intersects(BoundingBox b)
 		{
-			if (Max.X < b.Min.X) return false;
-			if (Max.Y < b.Min.Y) return false;
-			if (Max.Z < b.Min.Z) return false;
-			if (Min.X > b.Max.X) return false;
-			if (Min.Y > b.Max.Y) return false;
-			if (Min.Z > b.Max.Z) return false;
+			if (Max.x < b.Min.x) return false;
+			if (Max.y < b.Min.y) return false;
+			if (Max.z < b.Min.z) return false;
+			if (Min.x > b.Max.x) return false;
+			if (Min.y > b.Max.y) return false;
+			if (Min.z > b.Max.z) return false;
 			return true;
 		}
 		public override string ToString() => $"{Center}, s={Size}";
@@ -242,29 +239,29 @@ namespace Csg
 
 	public class BoundingSphere
 	{
-		public Vector3D Center;
+		public Vector3 Center;
 		public float Radius;
 	}
 
 	class OrthoNormalBasis
 	{
-		public readonly Vector3D U;
-		public readonly Vector3D V;
+		public readonly Vector3 U;
+		public readonly Vector3 V;
 		public readonly Plane Plane;
-		public readonly Vector3D PlaneOrigin;
+		public readonly Vector3 PlaneOrigin;
 		public OrthoNormalBasis(Plane plane)
 		{
 			var rightvector = plane.Normal.RandomNonParallelVector();
-			V = plane.Normal.Cross(rightvector).Unit;
-			U = V.Cross(plane.Normal);
+			V = Vector3.Cross(plane.Normal,rightvector).normalized;
+			U = Vector3.Cross(V,plane.Normal);
 			Plane = plane;
 			PlaneOrigin = plane.Normal * plane.W;
 		}
-		public Vector2D To2D(Vector3D vec3)
+		public Vector2D To2D(Vector3 vec3)
 		{
-			return new Vector2D(vec3.Dot(U), vec3.Dot(V));
+			return new Vector2D(Vector3.Dot(vec3,U), Vector3.Dot(vec3,V));
 		}
-		public Vector3D To3D(Vector2D vec2)
+		public Vector3 To3D(Vector2D vec2)
 		{
 			return PlaneOrigin + U * vec2.X + V * vec2.Y;
 		}
@@ -312,18 +309,18 @@ namespace Csg
 
 		public float[] Elements => elements;
 
-		public static Matrix4x4 Scaling(Vector3D vec)
+		public static Matrix4x4 Scaling(Vector3 vec)
 		{
 			var els = new[] {
-				vec.X, 0, 0, 0, 0, vec.Y, 0, 0, 0, 0, vec.Z, 0, 0, 0, 0, 1
+				vec.x, 0, 0, 0, 0, vec.y, 0, 0, 0, 0, vec.z, 0, 0, 0, 0, 1
 			};
 			return new Matrix4x4(els);
 		}
 
-		public static Matrix4x4 Translation(Vector3D vec)
+		public static Matrix4x4 Translation(Vector3 vec)
 		{
 			var els = new[] {
-				1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, vec.X, vec.Y, vec.Z, 1
+				1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, vec.x, vec.y, vec.z, 1
 			};
 			return new Matrix4x4(els);
 		}
@@ -361,11 +358,11 @@ namespace Csg
 			return new Matrix4x4(els);
 		}
 
-		public Vector3D LeftMultiply1x3Vector(Vector3D v)
+		public Vector3 LeftMultiply1x3Vector(Vector3 v)
 		{
-			var v0 = v.X;
-			var v1 = v.Y;
-			var v2 = v.Z;
+			var v0 = v.x;
+			var v1 = v.y;
+			var v2 = v.z;
 			var v3 = 1;
 			var x = v0 * this.elements[0] + v1 * this.elements[4] + v2 * this.elements[8] + v3 * this.elements[12];
 			var y = v0 * this.elements[1] + v1 * this.elements[5] + v2 * this.elements[9] + v3 * this.elements[13];
@@ -379,7 +376,7 @@ namespace Csg
 				y *= invw;
 				z *= invw;
 			}
-			return new Vector3D(x, y, z);
+			return new Vector3(x, y, z);
 		}
 
 		public static Matrix4x4 operator * (Matrix4x4 l, Matrix4x4 m)
