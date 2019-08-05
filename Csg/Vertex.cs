@@ -61,7 +61,7 @@ namespace Csg
         /// <param name="matrix4x4">The transformation.</param>
         public Vertex Transform(Matrix4x4 matrix4x4)
         {
-            var newpos = matrix4x4.LeftMultiply1x3Vector(Pos);
+            var newpos = matrix4x4.MultiplyPoint(Pos);
             return new Vertex(newpos, Tex);
         }
     }

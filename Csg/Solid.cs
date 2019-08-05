@@ -144,7 +144,6 @@ namespace Csg
 
 		public Solid Transform(Matrix4x4 matrix4x4)
 		{
-			var ismirror = matrix4x4.IsMirroring;
 			var transformedvertices = new Dictionary<int, Vertex>();
 			var transformedplanes = new Dictionary<int, Plane>();
 			var newpolygons = new List<Polygon>();
@@ -171,7 +170,6 @@ namespace Csg
 					}
 					newvertices.Add(newvertex);
 				}
-				if (ismirror) newvertices.Reverse();
 				newpolygons.Add(new Polygon(newvertices, p.Shared, newplane));
 			}
 			var result = Solid.FromPolygons(newpolygons);
@@ -182,27 +180,27 @@ namespace Csg
 
 		public Solid Translate(Vector3 offset)
 		{
-			return Transform(Matrix4x4.Translation(offset));
+			return Transform(Matrix4x4.Translate(offset));
 		}
 
 		public Solid Translate(float x = 0, float y = 0, float z = 0)
 		{
-			return Transform(Matrix4x4.Translation(new Vector3(x, y, z)));
+			return Transform(Matrix4x4.Translate(new Vector3(x, y, z)));
 		}
 
 		public Solid Scale(Vector3 scale)
 		{
-			return Transform(Matrix4x4.Scaling(scale));
+			return Transform(Matrix4x4.Scale(scale));
 		}
 
 		public Solid Scale(float scale)
 		{
-			return Transform(Matrix4x4.Scaling(new Vector3(scale, scale, scale)));
+			return Transform(Matrix4x4.Scale(new Vector3(scale, scale, scale)));
 		}
 
 		public Solid Scale(float x, float y, float z)
 		{
-			return Transform(Matrix4x4.Scaling(new Vector3(x, y, z)));
+			return Transform(Matrix4x4.Scale(new Vector3(x, y, z)));
 		}
 
 		Solid Canonicalized()

@@ -182,23 +182,16 @@ namespace Csg
         }
         public Plane Transform(Matrix4x4 matrix4x4)
         {
-            var ismirror = matrix4x4.IsMirroring;
             // get two vectors in the plane:
             var r = this.Normal.RandomNonParallelVector();
             var u = Vector3.Cross(this.Normal, r);
             var v = Vector3.Cross(this.Normal, u);
             // get 3 points in the plane:
-            var point1 = matrix4x4.LeftMultiply1x3Vector(this.Normal * this.W);
-            var point2 = matrix4x4.LeftMultiply1x3Vector(point1 + u);
-            var point3 = matrix4x4.LeftMultiply1x3Vector(point1 + v);
+            var point1 = matrix4x4.MultiplyPoint(this.Normal * this.W);
+            var point2 = matrix4x4.MultiplyPoint(point1 + u);
+            var point3 = matrix4x4.MultiplyPoint(point1 + v);
             // and create a new plane from the transformed points:
             var newplane = Plane.FromVector3Ds(point1, point2, point3);
-            if (ismirror)
-            {
-                // the transform is mirroring
-                // We should mirror the plane:
-                newplane = newplane.Flipped();
-            }
             return newplane;
         }
     }
