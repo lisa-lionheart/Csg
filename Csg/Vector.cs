@@ -1,12 +1,13 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Csg
 {
 	public struct Vector3D : IEquatable<Vector3D>
 	{
-		public double X, Y, Z;
+		public float X, Y, Z;
 
-		public Vector3D(double x, double y, double z)
+		public Vector3D(float x, float y, float z)
 		{
 			X = x;
 			Y = y;
@@ -20,12 +21,12 @@ namespace Csg
 #pragma warning restore RECS0018 // Comparison of floating point numbers with equality operator
 		}
 
-		public double Length
+		public float Length
 		{
-			get { return Math.Sqrt(X * X + Y * Y + Z * Z); }
+			get { return Mathf.Sqrt(X * X + Y * Y + Z * Z); }
 		}
 
-		public double DistanceToSquared(Vector3D a)
+		public float DistanceToSquared(Vector3D a)
 		{
 			var dx = X - a.X;
 			var dy = Y - a.Y;
@@ -33,7 +34,7 @@ namespace Csg
 			return dx * dx + dy * dy + dz * dz;
 		}
 
-		public double Dot(Vector3D a)
+		public float Dot(Vector3D a)
 		{
 			return X * a.X + Y * a.Y + Z * a.Z;
 		}
@@ -67,18 +68,18 @@ namespace Csg
 		{
 			get
 			{
-				return new Vector3D(Math.Abs(X), Math.Abs(Y), Math.Abs(Z));
+				return new Vector3D(Mathf.Abs(X), Mathf.Abs(Y), Mathf.Abs(Z));
 			}
 		}
 
 		public Vector3D Min(Vector3D other)
 		{
-			return new Vector3D(Math.Min(X, other.X), Math.Min(Y, other.Y), Math.Min(Z, other.Z));
+			return new Vector3D(Mathf.Min(X, other.X), Mathf.Min(Y, other.Y), Mathf.Min(Z, other.Z));
 		}
 
 		public Vector3D Max(Vector3D other)
 		{
-			return new Vector3D(Math.Max(X, other.X), Math.Max(Y, other.Y), Math.Max(Z, other.Z));
+			return new Vector3D(Mathf.Max(X, other.X), Mathf.Max(Y, other.Y), Mathf.Max(Z, other.Z));
 		}
 
 		public static Vector3D operator +(Vector3D a, Vector3D b)
@@ -93,11 +94,11 @@ namespace Csg
 		{
 			return new Vector3D(a.X * b.X, a.Y * b.Y, a.Z * b.Z);
 		}
-		public static Vector3D operator *(Vector3D a, double b)
+		public static Vector3D operator *(Vector3D a, float b)
 		{
 			return new Vector3D(a.X * b, a.Y * b, a.Z * b);
 		}
-		public static Vector3D operator /(Vector3D a, double b)
+		public static Vector3D operator /(Vector3D a, float b)
 		{
 			return new Vector3D(a.X / b, a.Y / b, a.Z / b);
 		}
@@ -130,9 +131,9 @@ namespace Csg
 
 	public struct Vector2D : IEquatable<Vector2D>
 	{
-		public double X, Y;
+		public float X, Y;
 
-		public Vector2D(double x, double y)
+		public Vector2D(float x, float y)
 		{
 			X = x;
 			Y = y;
@@ -145,19 +146,19 @@ namespace Csg
 #pragma warning restore RECS0018 // Comparison of floating point numbers with equality operator
 		}
 
-		public double Length
+		public float Length
 		{
-			get { return Math.Sqrt(X * X + Y * Y); }
+			get { return Mathf.Sqrt(X * X + Y * Y); }
 		}
 
-		public double DistanceTo(Vector2D a)
+		public float DistanceTo(Vector2D a)
 		{
 			var dx = X - a.X;
 			var dy = Y - a.Y;
-			return Math.Sqrt(dx * dx + dy * dy);
+			return Mathf.Sqrt(dx * dx + dy * dy);
 		}
 
-		public double Dot(Vector2D a)
+		public float Dot(Vector2D a)
 		{
 			return X * a.X + Y * a.Y;
 		}
@@ -187,11 +188,11 @@ namespace Csg
 		{
 			return new Vector2D(a.X * b.X, a.Y * b.Y);
 		}
-		public static Vector2D operator *(Vector2D a, double b)
+		public static Vector2D operator *(Vector2D a, float b)
 		{
 			return new Vector2D(a.X * b, a.Y * b);
 		}
-		public static Vector2D operator /(Vector2D a, double b)
+		public static Vector2D operator /(Vector2D a, float b)
 		{
 			return new Vector2D(a.X / b, a.Y / b);
 		}
@@ -215,7 +216,7 @@ namespace Csg
 		{
 			return new BoundingBox(position, position + size);
 		}
-		public BoundingBox(double dx, double dy, double dz)
+		public BoundingBox(float dx, float dy, float dz)
 		{
 			Min = new Vector3D(-dx / 2, -dy / 2, -dz / 2);
 			Max = new Vector3D(dx / 2, dy / 2, dz / 2);
@@ -242,7 +243,7 @@ namespace Csg
 	public class BoundingSphere
 	{
 		public Vector3D Center;
-		public double Radius;
+		public float Radius;
 	}
 
 	class OrthoNormalBasis
@@ -272,12 +273,12 @@ namespace Csg
 	class Line2D
 	{
 		readonly Vector2D normal;
-		//readonly double w;
-		public Line2D(Vector2D normal, double w)
+		//readonly float w;
+		public Line2D(Vector2D normal, float w)
 		{
 			var l = normal.Length;
 			w *= l;
-			normal = normal * (1.0 / l);
+			normal = normal * (1.0f / l);
 			this.normal = normal;
 			//this.w = w;
 		}
@@ -293,23 +294,23 @@ namespace Csg
 
 	public class Matrix4x4
 	{
-		readonly double[] elements;
+		readonly float[] elements;
 
 		public bool IsMirroring = false;
 
-		public Matrix4x4(double[] els)
+		public Matrix4x4(float[] els)
 		{
 			elements = els;
 		}
 
 		public Matrix4x4()
-			: this(new double[] {
+			: this(new float[] {
 				1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
 			})
 		{
 		}
 
-		public double[] Elements => elements;
+		public float[] Elements => elements;
 
 		public static Matrix4x4 Scaling(Vector3D vec)
 		{
@@ -327,34 +328,34 @@ namespace Csg
 			return new Matrix4x4(els);
 		}
 
-		public static Matrix4x4 RotationX(double degrees)
+		public static Matrix4x4 RotationX(float degrees)
 		{
-			var radians = degrees * Math.PI * (1.0 / 180.0);
-			var cos = Math.Cos(radians);
-			var sin = Math.Sin(radians);
-			var els = new double[] {
+			var radians = degrees * Mathf.PI * (1.0f / 180.0f);
+			var cos = Mathf.Cos(radians);
+			var sin = Mathf.Sin(radians);
+			var els = new float[] {
 				1, 0, 0, 0, 0, cos, sin, 0, 0, -sin, cos, 0, 0, 0, 0, 1
 			};
 			return new Matrix4x4(els);
 		}
 
-		public static Matrix4x4 RotationY(double degrees)
+		public static Matrix4x4 RotationY(float degrees)
 		{
-			var radians = degrees * Math.PI * (1.0 / 180.0);
-			var cos = Math.Cos(radians);
-			var sin = Math.Sin(radians);
-			var els = new double[] {
+			var radians = degrees * Mathf.PI * (1.0f / 180.0f);
+			var cos = Mathf.Cos(radians);
+			var sin = Mathf.Sin(radians);
+			var els = new float[] {
 				cos, 0, -sin, 0, 0, 1, 0, 0, sin, 0, cos, 0, 0, 0, 0, 1
 			};
 			return new Matrix4x4(els);
 		}
 
-		public static Matrix4x4 RotationZ(double degrees)
+		public static Matrix4x4 RotationZ(float degrees)
 		{
-			var radians = degrees * Math.PI * (1.0 / 180.0);
-			var cos = Math.Cos(radians);
-			var sin = Math.Sin(radians);
-			var els = new double[] {
+			var radians = degrees * Mathf.PI * (1.0f / 180.0f);
+			var cos = Mathf.Cos(radians);
+			var sin = Mathf.Sin(radians);
+			var els = new float[] {
 				cos, sin, 0, 0, -sin, cos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
 			};
 			return new Matrix4x4(els);
@@ -373,7 +374,7 @@ namespace Csg
 			// scale such that fourth element becomes 1:
 			if (w != 1)
 			{
-				var invw = 1.0 / w;
+				var invw = 1.0f / w;
 				x *= invw;
 				y *= invw;
 				z *= invw;
@@ -417,7 +418,7 @@ namespace Csg
 			var m14 = m.elements[14];
 			var m15 = m.elements[15];
 
-			var result = new double[16];
+			var result = new float[16];
 			result[0] = this0 * m0 + this1 * m4 + this2 * m8 + this3 * m12;
 			result[1] = this0 * m1 + this1 * m5 + this2 * m9 + this3 * m13;
 			result[2] = this0 * m2 + this1 * m6 + this2 * m10 + this3 * m14;

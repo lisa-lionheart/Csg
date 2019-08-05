@@ -5,10 +5,10 @@ namespace Csg
 {
     public class Plane : IEquatable<Plane>
     {
-        const double EPSILON = 1e-5;
+        const float EPSILON = 1e-5f;
 
         public readonly Vector3D Normal;
-        public readonly double W;
+        public readonly float W;
         int tag = 0;
         public int Tag
         {
@@ -21,7 +21,7 @@ namespace Csg
                 return tag;
             }
         }
-        public Plane(Vector3D normal, double w)
+        public Plane(Vector3D normal, float w)
         {
             Normal = normal;
             W = w;
@@ -167,7 +167,7 @@ namespace Csg
             var p2 = v2.Pos;
             var direction = p2 - (p1);
             var u = (W - Normal.Dot(p1)) / Normal.Dot(direction);
-            if (double.IsNaN(u)) u = 0;
+            if (float.IsNaN(u)) u = 0;
             if (u > 1) u = 1;
             if (u < 0) u = 0;
             var result = p1 + (direction * (u));

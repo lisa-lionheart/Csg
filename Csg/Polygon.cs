@@ -44,7 +44,7 @@ namespace Csg
 				if (cachedBoundingSphere == null)
 				{
 					var box = BoundingBox;
-					var middle = (box.Min + box.Max) * 0.5;
+					var middle = (box.Min + box.Max) * 0.5f;
 					var radius3 = box.Max - middle;
 					var radius = radius3.Length;
 					cachedBoundingSphere = new BoundingSphere { Center = middle, Radius = radius };
