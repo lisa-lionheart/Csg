@@ -17,10 +17,10 @@ namespace Csg.Test
 						Sphere(r: 2, center: true)
 					),
 					Intersection(
-						Sphere(r: 1.3, center: true),
-						Cube(size: 2.1, center: true)
+						Sphere(r: 1.3f, center: true),
+						Cube(size: 2.1f, center: true)
 					)
-				).Translate(0, 0, 1.5).Scale(10);
+				).Translate(0, 0, 1.5f).Scale(10);
 			AssertAcceptedStl(r, "Examples");
 		}
 	}

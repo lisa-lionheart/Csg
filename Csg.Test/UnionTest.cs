@@ -10,8 +10,8 @@ namespace Csg.Test
 		[Test]
 		public void UnitSphere_UnitSphere()
 		{
-			var sphere1 = Sphere(1, new Vector3D(-0.5, 0, 0));
-			var sphere2 = Sphere(1, new Vector3D(0.5, 0, 0));
+			var sphere1 = Sphere(1, new Vector3D(-0.5f, 0, 0));
+			var sphere2 = Sphere(1, new Vector3D(0.5f, 0, 0));
 			var r = sphere1.Union(sphere2);
 			Assert.AreEqual(136, r.Polygons.Count);
 			Assert.IsTrue(r.IsCanonicalized);

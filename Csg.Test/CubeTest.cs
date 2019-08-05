@@ -37,7 +37,7 @@ namespace Csg.Test
 		[Test]
 		public void BigRadius()
 		{
-			var s = Cube(1.0e12);
+			var s = Cube(1.0e12f);
 			AssertAcceptedStl(s, "CubeTest");
 		}
 	}

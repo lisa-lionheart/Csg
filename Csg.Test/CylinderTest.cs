@@ -29,14 +29,14 @@ namespace Csg.Test
 		[Test]
 		public void BigRadius()
 		{
-			var solid = Cylinder(1.0e12, 1);
+			var solid = Cylinder(1.0e12f, 1);
 			AssertAcceptedStl(solid, "CylinderTest");
 		}
 
 		[Test]
 		public void BigRadiusCentered()
 		{
-			var solid = Cylinder(1.0e12, 1, center: true);
+			var solid = Cylinder(1.0e12f, 1, center: true);
 			var pm = solid.Polygons[solid.Polygons.Count-2];
 			Assert.GreaterOrEqual(pm.Plane.W, 0.9e12);
 			Assert.LessOrEqual(pm.Plane.W, 1.1e12);

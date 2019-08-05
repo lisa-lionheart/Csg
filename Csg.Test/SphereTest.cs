@@ -21,10 +21,10 @@ namespace Csg.Test
 		[Test]
 		public void BigRadius()
 		{
-			var sphere = Sphere(1.0e12);
+			var sphere = Sphere(1.0e8f);
 			var p0 = sphere.Polygons[0];
-			Assert.GreaterOrEqual(p0.Plane.W, 0.9e12);
-			Assert.LessOrEqual(p0.Plane.W, 1.1e12);
+			Assert.GreaterOrEqual(p0.Plane.W, 0.9e8);
+			Assert.LessOrEqual(p0.Plane.W, 1.1e8);
 			AssertAcceptedStl(sphere, "SphereTest");
 		}
 	}
