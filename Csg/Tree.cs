@@ -12,7 +12,7 @@ namespace Csg
 
 		public Node RootNode => rootnode;
 
-		public Tree(Bounds bbox, List<Polygon> polygons)
+		public Tree(Bounds bbox, IReadOnlyList<Polygon> polygons)
 		{
 			polygonTree = new PolygonTreeNode();
 			rootnode = new Node(null);
@@ -37,7 +37,7 @@ namespace Csg
 			return result;
 		}
 
-		public void AddPolygons(List<Polygon> polygons)
+		public void AddPolygons(IReadOnlyList<Polygon> polygons)
 		{
 			var n = polygons.Count;
 			var polygontreenodes = new PolygonTreeNodeList(n);

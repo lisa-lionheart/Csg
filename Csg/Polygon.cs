@@ -11,7 +11,7 @@ namespace Csg
 	/// </summary>
 	public class Polygon
 	{
-		public readonly List<Vertex> Vertices;
+		public readonly IReadOnlyList<Vertex> Vertices;
 		public readonly Plane Plane;
 		public readonly PolygonShared Shared;
 

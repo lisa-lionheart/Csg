@@ -9,10 +9,10 @@ namespace Csg
 	{
 		static readonly PolygonsPerPlaneKeyComparer polygonsPerPlaneKeyComparer = new PolygonsPerPlaneKeyComparer ();
 
-		public List<Polygon> Polygons;
+		public readonly IReadOnlyList<Polygon> Polygons;
 
-		public bool IsCanonicalized;
-		public bool IsRetesselated;
+		public readonly bool IsCanonicalized;
+		public readonly bool IsRetesselated;
 
 		public const int DefaultResolution2D = 32;
 		public const int DefaultResolution3D = 12;
@@ -26,13 +26,20 @@ namespace Csg
 			IsRetesselated = true;
 		}
 
-		public static Solid FromPolygons(List<Polygon> polygons)
+        public Solid(IReadOnlyList<Polygon> polygons, bool isCannonicalized, bool isRetesselated, bool copy = true) {
+            if (copy) {
+                Polygons = new List<Polygon>(polygons);
+            } else {
+                Polygons = polygons;
+            }
+
+            IsCanonicalized = isCannonicalized;
+            IsRetesselated = isRetesselated;
+        }
+
+        public static Solid FromPolygons(IReadOnlyList<Polygon> polygons)
 		{
-			var csg = new Solid();
-			csg.Polygons = polygons;
-			csg.IsCanonicalized = false;
-			csg.IsRetesselated = false;
-			return csg;
+			return new Solid(polygons, false, false);
 		}
 
 		public Solid Union(params Solid[] others)
@@ -78,10 +85,11 @@ namespace Csg
 		{
 			var newpolygons = new List<Polygon>(Polygons);
 			newpolygons.AddRange(csg.Polygons);
-			var result = Solid.FromPolygons(newpolygons);
-			result.IsCanonicalized = IsCanonicalized && csg.IsCanonicalized;
-			result.IsRetesselated = IsRetesselated && csg.IsRetesselated;
-			return result;
+			return new Solid(newpolygons, 
+				IsCanonicalized && csg.IsCanonicalized, 
+				IsRetesselated && csg.IsRetesselated,
+				copy: false
+			);
 		}
 
 		public Solid Substract(params Solid[] csgs)
@@ -172,10 +180,8 @@ namespace Csg
 				}
 				newpolygons.Add(new Polygon(newvertices, p.Shared, newplane));
 			}
-			var result = Solid.FromPolygons(newpolygons);
-			result.IsRetesselated = this.IsRetesselated;
-			result.IsCanonicalized = this.IsCanonicalized;
-			return result;
+
+            return new Solid(newpolygons, this.IsCanonicalized, this.IsRetesselated, copy: false);
 		}
 
 		public Solid Translate(Vector3 offset)
@@ -212,10 +218,8 @@ namespace Csg
 			else {
 				var factory = new FuzzyCsgFactory();
 				var result = factory.GetCsg(this);
-				result.IsCanonicalized = true;
-				result.IsRetesselated = IsRetesselated;
-				return result;
-			}
+                return new Solid(result.Polygons, true, this.IsRetesselated, copy: false);
+            }
 		}
 
 		Solid Retesselated()
@@ -272,10 +276,7 @@ namespace Csg
 				//foreach (var x in retess) {
 				//	destpolygons.AddRange (x.Retesselated);
 				//}
-
-				var result = Solid.FromPolygons(destpolygons);
-				result.IsRetesselated = true;
-				return result;
+                return new Solid(destpolygons, false, true, copy: false);
 			}
 		}
 
@@ -933,7 +934,7 @@ namespace Csg
 					newpolygons.Add(newpolygon);
 				}
 			}
-			return Solid.FromPolygons(newpolygons);
+			return new Solid(newpolygons, false, false, copy: false);
 		}
 	}
 
