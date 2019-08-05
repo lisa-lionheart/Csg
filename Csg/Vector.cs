@@ -101,7 +101,7 @@ namespace Csg
 
 	}*/
 
-	public static class Vector3Extensions {
+    public static class Vector3Extensions {
         public static Vector3 Abs(this Vector3 self) {
                 return new Vector3(Mathf.Abs(self.x), Mathf.Abs(self.y), Mathf.Abs(self.z));
         }
@@ -125,7 +125,7 @@ namespace Csg
             return dx * dx + dy * dy + dz * dz;
         }
     }
-
+	/*
     public struct Vector2 : IEquatable<Vector2>
 	{
 		public float x, y;
@@ -143,35 +143,23 @@ namespace Csg
 #pragma warning restore RECS0018 // Comparison of floating point numbers with equality operator
 		}
 
-		public float Length
+		public float magnitude
 		{
 			get { return Mathf.Sqrt(x * x + y * y); }
 		}
 
-		public float DistanceTo(Vector2 a)
-		{
-			var dx = x - a.x;
-			var dy = y - a.y;
-			return Mathf.Sqrt(dx * dx + dy * dy);
-		}
 
-		public float Dot(Vector2 a)
-		{
-			return x * a.x + y * a.y;
-		}
-
-		public Vector2 Unit
+		public Vector2 normalized
 		{
 			get
 			{
-				var d = Length;
+				var d = magnitude;
 				return new Vector2(x / d, y / d);
 			}
 		}
 
 		public Vector2 Negated => new Vector2(-x, -y);
 
-		public Vector2 Normal => new Vector2(y, -x);
 
 		public static Vector2 operator +(Vector2 a, Vector2 b)
 		{
@@ -199,6 +187,23 @@ namespace Csg
 			return string.Format(System.Globalization.CultureInfo.InvariantCulture, "[{0:0.000}, {1:0.000}]", x, y);
 		}
 	}
+	*/
+	public static class Vector2Extensions
+    {
+
+        public static float DistanceTo(this Vector2 self, Vector2 a) {
+            var dx = self.x - a.x;
+            var dy = self.y - a.y;
+            return Mathf.Sqrt(dx * dx + dy * dy);
+        }
+
+        public static float Dot(this Vector2 self, Vector2 a) {
+            return self.x * a.x + self.y * a.y;
+        }
+        public static Vector2 Normal(this Vector2 self) {
+            return new Vector2(self.y, -self.x);
+        }
+    }
 
 	public class BoundingBox
 	{
@@ -273,17 +278,17 @@ namespace Csg
 		//readonly float w;
 		public Line2D(Vector2 normal, float w)
 		{
-			var l = normal.Length;
+			var l = normal.magnitude;
 			w *= l;
 			normal = normal * (1.0f / l);
 			this.normal = normal;
 			//this.w = w;
 		}
-		public Vector2 Direction => normal.Normal;
+		public Vector2 Direction => normal.Normal();
 		public static Line2D FromPoints(Vector2 p1, Vector2 p2)
 		{
 			var direction = p2 - (p1);
-			var normal = direction.Normal.Negated.Unit;
+            var normal = direction.Normal().normalized * -1f;
 			var w = p1.Dot(normal);
 			return new Line2D(normal, w);
 		}
