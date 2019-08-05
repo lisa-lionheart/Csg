@@ -265,7 +265,7 @@ namespace Csg
 			}
 		}
 
-		static Vertex NoTexVertex (Vector3 pos) => new Vertex (pos, new Vector2D (0, 0));
+		static Vertex NoTexVertex (Vector3 pos) => new Vertex (pos, new Vector2 (0, 0));
 
 		static readonly int[][][] cubeData =
 			{

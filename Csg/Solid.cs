@@ -397,7 +397,7 @@ namespace Csg
 							var pos2d = orthobasis.To2D(poly3d.Vertices[i].Pos);
 							// perform binning of y coordinates: If we have multiple vertices very
 							// close to each other, give them the same y coordinate:
-							var ycoordinatebin = Mathf.Floor(pos2d.Y * ycoordinateBinningFactor);
+							var ycoordinatebin = Mathf.Floor(pos2d.y * ycoordinateBinningFactor);
 							float newy;
 							if (ycoordinatebins.ContainsKey(ycoordinatebin))
 							{
@@ -412,12 +412,12 @@ namespace Csg
 								newy = ycoordinatebins[ycoordinatebin - 1];
 							}
 							else {
-								newy = pos2d.Y;
-								ycoordinatebins[ycoordinatebin] = pos2d.Y;
+								newy = pos2d.y;
+								ycoordinatebins[ycoordinatebin] = pos2d.y;
 							}
-							pos2d = new Vector2D(pos2d.X, newy);
+							pos2d = new Vector2(pos2d.x, newy);
 							vertices2d.Add(new Vertex2D (pos2d, poly3d.Vertices[i].Tex));
-							var y = pos2d.Y;
+							var y = pos2d.y;
 							if ((i == 0) || (y < miny))
 							{
 								miny = y;
@@ -500,12 +500,12 @@ namespace Csg
 							{
 								var nextleftvertexindex = newleftvertexindex + 1;
 								if (nextleftvertexindex >= numvertices) nextleftvertexindex = 0;
-								if (vertices2d[nextleftvertexindex].Pos.Y != ycoordinate) break;
+								if (vertices2d[nextleftvertexindex].Pos.y != ycoordinate) break;
 								newleftvertexindex = nextleftvertexindex;
 							}
 							var nextrightvertexindex = newrightvertexindex - 1;
 							if (nextrightvertexindex < 0) nextrightvertexindex = numvertices - 1;
-							if (vertices2d[nextrightvertexindex].Pos.Y == ycoordinate)
+							if (vertices2d[nextrightvertexindex].Pos.y == ycoordinate)
 							{
 								newrightvertexindex = nextrightvertexindex;
 							}
@@ -557,7 +557,7 @@ namespace Csg
 								{
 									var i = topleftvertexindex + 1;
 									if (i >= numvertices) i = 0;
-									if (vertices2d[i].Pos.Y != ycoordinate) break;
+									if (vertices2d[i].Pos.y != ycoordinate) break;
 									if (i == topvertexindex) break; // should not happen, but just to prevent endless loops
 									topleftvertexindex = i;
 								}
@@ -566,7 +566,7 @@ namespace Csg
 								{
 									var i = toprightvertexindex - 1;
 									if (i < 0) i = numvertices - 1;
-									if (vertices2d[i].Pos.Y != ycoordinate) break;
+									if (vertices2d[i].Pos.y != ycoordinate) break;
 									if (i == topleftvertexindex) break; // should not happen, but just to prevent endless loops
 									toprightvertexindex = i;
 								}
@@ -663,8 +663,8 @@ namespace Csg
 													// Yes, the top of this polygon matches the bottom of the previous:
 													matchedindexes.Add (ii);
 													// Now check if the joined polygon would remain convex:
-													var d1 = thispolygon.leftline.Direction.X - prevpolygon.leftline.Direction.X;
-													var d2 = thispolygon.rightline.Direction.X - prevpolygon.rightline.Direction.X;
+													var d1 = thispolygon.leftline.Direction.x - prevpolygon.leftline.Direction.x;
+													var d2 = thispolygon.rightline.Direction.x - prevpolygon.rightline.Direction.x;
 													var leftlinecontinues = Mathf.Abs (d1) < EPS;
 													var rightlinecontinues = Mathf.Abs (d2) < EPS;
 													var leftlineisconvex = leftlinecontinues || (d1 >= 0);
@@ -771,8 +771,8 @@ namespace Csg
 		{
 			var point1 = vertex1.Pos;
 			var point2 = vertex2.Pos;
-			var f1 = y - point1.Y;
-			var f2 = point2.Y - point1.Y;
+			var f1 = y - point1.y;
+			var f2 = point2.y - point1.y;
 			if (f2 < 0)
 			{
 				f1 = -f1;
@@ -794,7 +794,7 @@ namespace Csg
 			else {
 				t = f1 / f2;
 			}
-			var result = point1.X + t * (point2.X - point1.X);
+			var result = point1.x + t * (point2.x - point1.x);
 			return new Vertex2DInterpolation {
 				Result = result,
 				Tex = vertex1.Tex + (vertex2.Tex - vertex1.Tex) * t,
@@ -804,7 +804,7 @@ namespace Csg
 		struct Vertex2DInterpolation
 		{
 			public float Result;
-			public Vector2D Tex;
+			public Vector2 Tex;
 		}
 
 		/// <summary>
@@ -813,16 +813,16 @@ namespace Csg
 		/// </summary>
 		struct Vertex2D
 		{
-			public Vector2D Pos;
-			public Vector2D Tex;
-			public Vertex2D (Vector2D pos, Vector2D tex)
+			public Vector2 Pos;
+			public Vector2 Tex;
+			public Vertex2D (Vector2 pos, Vector2 tex)
 			{
 				Pos = pos;
 				Tex = tex;
 			}
-			public Vertex2D (float x, float y, Vector2D tex)
+			public Vertex2D (float x, float y, Vector2 tex)
 			{
-				Pos = new Vector2D (x, y);
+				Pos = new Vector2 (x, y);
 				Tex = tex;
 			}
 		}
@@ -952,8 +952,8 @@ namespace Csg
 				X = (int)(vertex.Pos.x * multiplier + 0.5),
 				Y = (int)(vertex.Pos.y * multiplier + 0.5),
 				Z = (int)(vertex.Pos.z * multiplier + 0.5),
-				U = (int)(vertex.Tex.X * multiplier + 0.5),
-				V = (int)(vertex.Tex.Y * multiplier + 0.5),
+				U = (int)(vertex.Tex.x * multiplier + 0.5),
+				V = (int)(vertex.Tex.y * multiplier + 0.5),
 			};
 			if (lookuptable.TryGetValue (key, out var v))
 				return v;

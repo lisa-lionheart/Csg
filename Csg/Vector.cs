@@ -126,77 +126,77 @@ namespace Csg
         }
     }
 
-    public struct Vector2D : IEquatable<Vector2D>
+    public struct Vector2 : IEquatable<Vector2>
 	{
-		public float X, Y;
+		public float x, y;
 
-		public Vector2D(float x, float y)
+		public Vector2(float x, float y)
 		{
-			X = x;
-			Y = y;
+			this.x = x;
+			this.y = y;
 		}
 
-		public bool Equals(Vector2D a)
+		public bool Equals(Vector2 a)
 		{
 #pragma warning disable RECS0018 // Comparison of floating point numbers with equality operator
-			return X == a.X && Y == a.Y;
+			return x == a.x && y == a.y;
 #pragma warning restore RECS0018 // Comparison of floating point numbers with equality operator
 		}
 
 		public float Length
 		{
-			get { return Mathf.Sqrt(X * X + Y * Y); }
+			get { return Mathf.Sqrt(x * x + y * y); }
 		}
 
-		public float DistanceTo(Vector2D a)
+		public float DistanceTo(Vector2 a)
 		{
-			var dx = X - a.X;
-			var dy = Y - a.Y;
+			var dx = x - a.x;
+			var dy = y - a.y;
 			return Mathf.Sqrt(dx * dx + dy * dy);
 		}
 
-		public float Dot(Vector2D a)
+		public float Dot(Vector2 a)
 		{
-			return X * a.X + Y * a.Y;
+			return x * a.x + y * a.y;
 		}
 
-		public Vector2D Unit
+		public Vector2 Unit
 		{
 			get
 			{
 				var d = Length;
-				return new Vector2D(X / d, Y / d);
+				return new Vector2(x / d, y / d);
 			}
 		}
 
-		public Vector2D Negated => new Vector2D(-X, -Y);
+		public Vector2 Negated => new Vector2(-x, -y);
 
-		public Vector2D Normal => new Vector2D(Y, -X);
+		public Vector2 Normal => new Vector2(y, -x);
 
-		public static Vector2D operator +(Vector2D a, Vector2D b)
+		public static Vector2 operator +(Vector2 a, Vector2 b)
 		{
-			return new Vector2D(a.X + b.X, a.Y + b.Y);
+			return new Vector2(a.x + b.x, a.y + b.y);
 		}
-		public static Vector2D operator -(Vector2D a, Vector2D b)
+		public static Vector2 operator -(Vector2 a, Vector2 b)
 		{
-			return new Vector2D(a.X - b.X, a.Y - b.Y);
+			return new Vector2(a.x - b.x, a.y - b.y);
 		}
-		public static Vector2D operator *(Vector2D a, Vector2D b)
+		public static Vector2 operator *(Vector2 a, Vector2 b)
 		{
-			return new Vector2D(a.X * b.X, a.Y * b.Y);
+			return new Vector2(a.x * b.x, a.y * b.y);
 		}
-		public static Vector2D operator *(Vector2D a, float b)
+		public static Vector2 operator *(Vector2 a, float b)
 		{
-			return new Vector2D(a.X * b, a.Y * b);
+			return new Vector2(a.x * b, a.y * b);
 		}
-		public static Vector2D operator /(Vector2D a, float b)
+		public static Vector2 operator /(Vector2 a, float b)
 		{
-			return new Vector2D(a.X / b, a.Y / b);
+			return new Vector2(a.x / b, a.y / b);
 		}
 
 		public override string ToString()
 		{
-			return string.Format(System.Globalization.CultureInfo.InvariantCulture, "[{0:0.000}, {1:0.000}]", X, Y);
+			return string.Format(System.Globalization.CultureInfo.InvariantCulture, "[{0:0.000}, {1:0.000}]", x, y);
 		}
 	}
 
@@ -257,21 +257,21 @@ namespace Csg
 			Plane = plane;
 			PlaneOrigin = plane.Normal * plane.W;
 		}
-		public Vector2D To2D(Vector3 vec3)
+		public Vector2 To2D(Vector3 vec3)
 		{
-			return new Vector2D(Vector3.Dot(vec3,U), Vector3.Dot(vec3,V));
+			return new Vector2(Vector3.Dot(vec3,U), Vector3.Dot(vec3,V));
 		}
-		public Vector3 To3D(Vector2D vec2)
+		public Vector3 To3D(Vector2 vec2)
 		{
-			return PlaneOrigin + U * vec2.X + V * vec2.Y;
+			return PlaneOrigin + U * vec2.x + V * vec2.y;
 		}
 	}
 
 	class Line2D
 	{
-		readonly Vector2D normal;
+		readonly Vector2 normal;
 		//readonly float w;
-		public Line2D(Vector2D normal, float w)
+		public Line2D(Vector2 normal, float w)
 		{
 			var l = normal.Length;
 			w *= l;
@@ -279,8 +279,8 @@ namespace Csg
 			this.normal = normal;
 			//this.w = w;
 		}
-		public Vector2D Direction => normal.Normal;
-		public static Line2D FromPoints(Vector2D p1, Vector2D p2)
+		public Vector2 Direction => normal.Normal;
+		public static Line2D FromPoints(Vector2 p1, Vector2 p2)
 		{
 			var direction = p2 - (p1);
 			var normal = direction.Normal.Negated.Unit;

@@ -12,7 +12,7 @@ namespace Csg
         /// <summary>
         /// The texture coordinate of this vertex.
         /// </summary>
-		public readonly Vector2D Tex;
+		public readonly Vector2 Tex;
 
         int tag = 0;
 
@@ -21,7 +21,7 @@ namespace Csg
         /// </summary>
         /// <param name="pos">World position</param>
         /// <param name="tex">Texture coordinate</param>
-        public Vertex(Vector3 pos, Vector2D tex)
+        public Vertex(Vector3 pos, Vector2 tex)
         {
             Pos = pos;
 			Tex = tex;
