@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 #nullable enable
 namespace Csg
@@ -96,7 +97,23 @@ namespace Csg
 			var newplane = Plane.Flipped();
 			return new Polygon(newvertices, Shared, newplane);
 		}
-	}
+
+        // Are any vertices incommon
+        public bool IsTouching(Polygon right) {
+            if (!BoundingBox.Intersects(right.BoundingBox)) {
+                return false;
+            }
+
+            for(int i=0; i < Vertices.Count; i++) {
+                for (int j = 0; j < right.Vertices.Count; j++) {
+					if(Vertices[i].Pos.Equals(right.Vertices[j].Pos)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
 
 	public class PolygonShared
 	{

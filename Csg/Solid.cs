@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -360,6 +361,77 @@ namespace Csg
 				return true;
 			}
 		}
+
+		private BitArray2D CalculateAdjacencyMap() {
+            BitArray2D result = new BitArray2D(Polygons.Count, Polygons.Count);
+			for(int i=0; i < Polygons.Count; i++) {
+                for (int j = 0; j < Polygons.Count; j++) {
+					if(i==j) {
+                        continue;
+                    }
+                    Polygon left = Polygons[i];
+                    Polygon right = Polygons[j];
+                    result[i, j] = left.IsTouching(right);
+                }
+            }
+            return result;
+        }
+
+		List<Solid> Partition() {
+
+            //BitArray2D adj = CalculateAdjacencyMap();
+
+			// Indexed from 1, 0=unassigned
+            int[] solidIndex = new int[Polygons.Count];
+            int solidCount = 0;
+
+            Queue<int> polygonQueue = new Queue<int>();
+
+            for (int i = 0; i < Polygons.Count; i++) {
+				if(solidIndex[i] != 0) {
+                    continue;
+                }
+				
+                int currentSolid = solidCount++;
+
+				// Flood algorythim
+                solidIndex[i] = currentSolid;
+                polygonQueue.Enqueue(i);
+                
+                while (polygonQueue.Count != 0) {
+                    int iPolygon = polygonQueue.Dequeue();        
+					for(int j=0; j < Polygons.Count; j++) {
+						
+                        // Already assigned to this solid
+                        if (solidIndex[j] != 0) {
+                            Debug.Assert(solidIndex[j] == currentSolid);
+                            continue;
+                        }
+
+						// Polygon is touching other polygon
+                        if (Polygons[iPolygon].IsTouching(Polygons[j])) {
+                            solidIndex[iPolygon] = currentSolid;
+                            polygonQueue.Enqueue(j);
+                        }
+                    }
+                }
+            }
+            List<Solid> result = new List<Solid>();
+            if (solidCount == 1) {
+                result.Add(this);
+            } else {
+                for (int i = 0; i < solidCount - 1; i++) {
+                    List<Polygon> polygons = new List<Polygon>();
+                    for (int j = 0; j < solidCount - 1; j++) {
+						if(solidIndex[j] == i-1) {
+                            polygons.Add(Polygons[j]);
+                        }
+                    }
+                    result.Add(new Solid(polygons, IsCanonicalized, IsRetesselated, copy: false));
+                }
+            }
+            return result;
+        }
 
 		static void RetesselateCoplanarPolygons(List<Polygon> sourcepolygons, List<Polygon> destpolygons)
 		{
