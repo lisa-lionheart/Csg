@@ -192,7 +192,7 @@ namespace Csg
 
 		public Solid Translate(float x = 0, float y = 0, float z = 0)
 		{
-			return Transform(Matrix4x4.Translate(new Vector3(x, y, z)));
+			return Translate(new Vector3(x, y, z));
 		}
 
 		public Solid Scale(Vector3 scale)
@@ -202,12 +202,12 @@ namespace Csg
 
 		public Solid Scale(float scale)
 		{
-			return Transform(Matrix4x4.Scale(new Vector3(scale, scale, scale)));
+			return Scale(new Vector3(scale, scale, scale));
 		}
 
 		public Solid Scale(float x, float y, float z)
 		{
-			return Transform(Matrix4x4.Scale(new Vector3(x, y, z)));
+			return Scale(new Vector3(x, y, z));
 		}
 
 		Solid Canonicalized()
