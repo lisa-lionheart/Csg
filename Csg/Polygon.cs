@@ -113,7 +113,16 @@ namespace Csg
             }
             return false;
         }
-    }
+
+		internal Polygon Translate (Vector3 offset)
+		{
+			List<Vertex> newVerts = new List<Vertex> (Vertices.Count);
+			for(var i=0; i < Vertices.Count; i++) {
+				newVerts.Add (Vertices[i].Translate(offset));
+			}
+			return new Polygon (newVerts, shared: Shared);
+		}
+	}
 
 	public class PolygonShared
 	{

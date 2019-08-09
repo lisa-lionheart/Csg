@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Csg
 {
@@ -64,6 +65,11 @@ namespace Csg
             var newpos = matrix4x4.MultiplyPoint(Pos);
             return new Vertex(newpos, Tex);
         }
-    }
+
+		internal Vertex Translate (Vector3 offset)
+		{
+			return new Vertex (Pos + offset, Tex);
+		}
+	}
 }
 

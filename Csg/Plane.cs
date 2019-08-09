@@ -162,7 +162,9 @@ namespace Csg
                 }
             }
         }
-        Vertex SplitLineBetweenVertices(Vertex v1, Vertex v2)
+
+
+		Vertex SplitLineBetweenVertices(Vertex v1, Vertex v2)
         {
             var p1 = v1.Pos;
             var p2 = v2.Pos;

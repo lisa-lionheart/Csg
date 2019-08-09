@@ -6,7 +6,7 @@ using UnityEngine;
 #nullable enable
 namespace Csg
 {
-	public class Solid
+    public class Solid
 	{
 		static readonly PolygonsPerPlaneKeyComparer polygonsPerPlaneKeyComparer = new PolygonsPerPlaneKeyComparer ();
 
@@ -27,13 +27,8 @@ namespace Csg
 			IsRetesselated = true;
 		}
 
-        public Solid(IReadOnlyList<Polygon> polygons, bool isCannonicalized, bool isRetesselated, bool copy = true) {
-            if (copy) {
-                Polygons = new List<Polygon>(polygons);
-            } else {
-                Polygons = polygons;
-            }
-
+        public Solid(IReadOnlyList<Polygon> polygons, bool isCannonicalized, bool isRetesselated) {
+            Polygons = polygons;            
             IsCanonicalized = isCannonicalized;
             IsRetesselated = isRetesselated;
         }
@@ -88,8 +83,7 @@ namespace Csg
 			newpolygons.AddRange(csg.Polygons);
 			return new Solid(newpolygons, 
 				IsCanonicalized && csg.IsCanonicalized, 
-				IsRetesselated && csg.IsRetesselated,
-				copy: false
+				IsRetesselated && csg.IsRetesselated
 			);
 		}
 
@@ -120,6 +114,42 @@ namespace Csg
 			if (canonicalize) result = result.Canonicalized();
 			return result;
 		}
+
+		public List<Solid> SubtractAndPartition(params Solid[] csgs) {
+            var a = new Tree(Bounds, Polygons);
+			bool reteselate = !IsRetesselated;
+			bool cannonicalize = !IsCanonicalized;
+			foreach (var csg in csgs) {
+				if(!csg.IsCanonicalized) {
+					cannonicalize = true;
+				}
+				if(!csg.IsRetesselated) {
+					reteselate = true;
+				}
+
+				var b = new Tree (csg.Bounds, csg.Polygons);
+				a.Invert ();
+				a.ClipTo (b);
+				b.ClipTo (a, true);
+				a.AddPolygons (b.AllPolygons ());
+				a.Invert ();
+			}
+
+            IEnumerable<IReadOnlyList<Polygon>> result = PartitionPolygons(a.AllPolygons());
+			
+			if(reteselate) {
+				result = result.Select (poly => Reteselate(poly, cannonicalize));
+			} else {
+				if (cannonicalize) {
+					result = result.Select (polys => {
+						var factory = new FuzzyCsgFactory ();
+						return factory.GetCsg (polys);
+					});
+				}
+			}
+
+            return result.Select(polys=>new Solid(polys,true,true)).ToList();
+        }
 
 		public Solid Intersect(params Solid[] csgs)
 		{
@@ -182,12 +212,24 @@ namespace Csg
 				newpolygons.Add(new Polygon(newvertices, p.Shared, newplane));
 			}
 
-            return new Solid(newpolygons, this.IsCanonicalized, this.IsRetesselated, copy: false);
+            return new Solid(newpolygons, this.IsCanonicalized, this.IsRetesselated);
+		}
+
+		/*
+		 * Move all vertices so the that center is now the origin
+		 */
+		public Solid Recenter()
+		{
+			return Translate (-Bounds.center);
 		}
 
 		public Solid Translate(Vector3 offset)
 		{
-			return Transform(Matrix4x4.Translate(offset));
+			var newPolygons = new List<Polygon>(Polygons.Count);
+			for(var i = 0; i < Polygons.Count; i++) {
+				newPolygons.Add (Polygons[i].Translate (offset));
+			}
+			return new Solid (newPolygons, IsCanonicalized, IsRetesselated);
 		}
 
 		public Solid Translate(float x = 0, float y = 0, float z = 0)
@@ -218,8 +260,8 @@ namespace Csg
 			}
 			else {
 				var factory = new FuzzyCsgFactory();
-				var result = factory.GetCsg(this);
-                return new Solid(result.Polygons, true, this.IsRetesselated, copy: false);
+				var result = factory.GetCsg(Polygons);
+                return new Solid(result, true, this.IsRetesselated);
             }
 		}
 
@@ -230,55 +272,53 @@ namespace Csg
 				return this;
 			}
 			else {
-				var csg = this;
-				var polygonsPerPlane = new Dictionary<PolygonsPerPlaneKey, List<Polygon>>(polygonsPerPlaneKeyComparer);
-				var isCanonicalized = csg.IsCanonicalized;
-				var fuzzyFactory = new FuzzyCsgFactory();
-				foreach (var polygon in csg.Polygons)
-				{
-					var plane = polygon.Plane;
-					var shared = polygon.Shared;
-					if (!isCanonicalized)
-					{
-						plane = fuzzyFactory.GetPlane(plane);
-						shared = fuzzyFactory.GetPolygonShared(shared);
-					}
-					var tag = new PolygonsPerPlaneKey { PlaneTag = plane.Tag, SharedTag = shared.Tag };
-					List<Polygon> ppp;
-					if (polygonsPerPlane.TryGetValue(tag, out ppp))
-					{
-						ppp.Add(polygon);
-					}
-					else {
-						ppp = new List<Polygon>(1);
-						ppp.Add(polygon);
-						polygonsPerPlane.Add(tag, ppp);
-					}
-				}
-				var destpolygons = new List<Polygon> ();
-				//var retess = new List<PlanePolygons> ();
-				foreach (var planetag in polygonsPerPlane)
-				{
-					var sourcepolygons = planetag.Value;
-					if (sourcepolygons.Count < 2)
-					{
-						destpolygons.AddRange(sourcepolygons);
-					}
-					else {
-						var retesselatedpolygons = new List<Polygon>(sourcepolygons.Count);
-						//retess.Add (new PlanePolygons { Source = sourcepolygons, Retesselated = retesselatedpolygons });
-						Solid.RetesselateCoplanarPolygons(sourcepolygons, retesselatedpolygons);
-						destpolygons.AddRange(retesselatedpolygons);
-					}
-				}
-				//System.Threading.Tasks.Parallel.ForEach (retess, x => {
-				//	Solid.RetesselateCoplanarPolygons (x.Source, x.Retesselated);
-				//});
-				//foreach (var x in retess) {
-				//	destpolygons.AddRange (x.Retesselated);
-				//}
-                return new Solid(destpolygons, false, true, copy: false);
+				return new Solid (Reteselate (Polygons, !IsCanonicalized), true, true);	
 			}
+		}
+
+		static List<Polygon> Reteselate(IReadOnlyList<Polygon> polygons, bool canonicalize)
+		{
+			var polygonsPerPlane = new Dictionary<PolygonsPerPlaneKey, List<Polygon>> (polygonsPerPlaneKeyComparer);
+			var fuzzyFactory = canonicalize ? new FuzzyCsgFactory () : null;
+			foreach (var polygon in polygons) {
+				var plane = polygon.Plane;
+				var shared = polygon.Shared;
+				if (fuzzyFactory != null) {
+					plane = fuzzyFactory.GetPlane (plane);
+					shared = fuzzyFactory.GetPolygonShared (shared);
+				}
+				var tag = new PolygonsPerPlaneKey { PlaneTag = plane.Tag, SharedTag = shared.Tag };
+				List<Polygon> ppp;
+				if (polygonsPerPlane.TryGetValue (tag, out ppp)) {
+					ppp.Add (polygon);
+				}
+				else {
+					ppp = new List<Polygon> (1);
+					ppp.Add (polygon);
+					polygonsPerPlane.Add (tag, ppp);
+				}
+			}
+			var destpolygons = new List<Polygon> ();
+			//var retess = new List<PlanePolygons> ();
+			foreach (var planetag in polygonsPerPlane) {
+				var sourcepolygons = planetag.Value;
+				if (sourcepolygons.Count < 2) {
+					destpolygons.AddRange (sourcepolygons);
+				}
+				else {
+					var retesselatedpolygons = new List<Polygon> (sourcepolygons.Count);
+					//retess.Add (new PlanePolygons { Source = sourcepolygons, Retesselated = retesselatedpolygons });
+					Solid.RetesselateCoplanarPolygons (sourcepolygons, retesselatedpolygons);
+					destpolygons.AddRange (retesselatedpolygons);
+				}
+			}
+			//System.Threading.Tasks.Parallel.ForEach (retess, x => {
+			//	Solid.RetesselateCoplanarPolygons (x.Source, x.Retesselated);
+			//});
+			//foreach (var x in retess) {
+			//	destpolygons.AddRange (x.Retesselated);
+			//}
+			return destpolygons;
 		}
 
 		//struct PlanePolygons
@@ -377,57 +417,52 @@ namespace Csg
             return result;
         }
 
-		List<Solid> Partition() {
+        public List<Solid> Partition() {
+            return PartitionPolygons(Polygons).Select(p => new Solid(p, IsCanonicalized, IsRetesselated)).ToList();
+        }
 
-            //BitArray2D adj = CalculateAdjacencyMap();
 
+
+		/**
+		 *  Split a list of polygons into a multiple sets of polygons based on polygons 
+		 *  touching each other
+		 */
+		static List<IReadOnlyList<Polygon>> PartitionPolygons(IReadOnlyList<Polygon> polygons) { 
 			// Indexed from 1, 0=unassigned
-            int[] solidIndex = new int[Polygons.Count];
-            int solidCount = 0;
-
-            Queue<int> polygonQueue = new Queue<int>();
-
-            for (int i = 0; i < Polygons.Count; i++) {
-				if(solidIndex[i] != 0) {
-                    continue;
-                }
-				
-                int currentSolid = solidCount++;
-
-				// Flood algorythim
-                solidIndex[i] = currentSolid;
-                polygonQueue.Enqueue(i);
-                
-                while (polygonQueue.Count != 0) {
-                    int iPolygon = polygonQueue.Dequeue();        
-					for(int j=0; j < Polygons.Count; j++) {
-						
-                        // Already assigned to this solid
-                        if (solidIndex[j] != 0) {
-                            Debug.Assert(solidIndex[j] == currentSolid);
-                            continue;
-                        }
-
-						// Polygon is touching other polygon
-                        if (Polygons[iPolygon].IsTouching(Polygons[j])) {
-                            solidIndex[iPolygon] = currentSolid;
-                            polygonQueue.Enqueue(j);
+            int[] setAssignment = new int[polygons.Count];
+            int setCount = 0;
+			for (int iRootPolygon = 0; iRootPolygon < polygons.Count; iRootPolygon++) {
+                if (setAssignment[iRootPolygon] == 0) {
+					setCount++;
+                    setAssignment[iRootPolygon] = setCount;
+					
+                    // Flood algorythim
+                    Queue<int> polygonQueue = new Queue<int>();
+                    polygonQueue.Enqueue(iRootPolygon);
+                    while (polygonQueue.Count != 0) {
+                        int iPolygon = polygonQueue.Dequeue();
+                        for (int iOtherPolygon = 0; iOtherPolygon < polygons.Count; iOtherPolygon++) {
+							// Polygon is touching other polygon and is unassigned
+                            if (setAssignment[iOtherPolygon] == 0 && polygons[iPolygon].IsTouching(polygons[iOtherPolygon])) {
+                                setAssignment[iPolygon] = setAssignment[iRootPolygon];
+                                polygonQueue.Enqueue(iOtherPolygon);
+                            }
                         }
                     }
                 }
             }
-            List<Solid> result = new List<Solid>();
-            if (solidCount == 1) {
-                result.Add(this);
+            List<IReadOnlyList<Polygon>> result = new List<IReadOnlyList<Polygon>>();
+            if (setCount == 1) {
+                result.Add(polygons);
             } else {
-                for (int i = 0; i < solidCount - 1; i++) {
-                    List<Polygon> polygons = new List<Polygon>();
-                    for (int j = 0; j < solidCount - 1; j++) {
-						if(solidIndex[j] == i-1) {
-                            polygons.Add(Polygons[j]);
+                for (int iSet = 1; iSet <= setCount; iSet++) {
+                    List<Polygon> polygonSet = new List<Polygon>();
+                    for (int iPolygon = 0; iPolygon < polygons.Count; iPolygon++) {
+						if(setAssignment[iPolygon] == iSet) {
+                            polygonSet.Add(polygons[iPolygon]);
                         }
                     }
-                    result.Add(new Solid(polygons, IsCanonicalized, IsRetesselated, copy: false));
+                    result.Add(polygonSet);
                 }
             }
             return result;
@@ -926,179 +961,6 @@ namespace Csg
 		public static int GetTag()
 		{
 			return System.Threading.Interlocked.Increment (ref staticTag);
-		}
-	}
-
-	class FuzzyCsgFactory
-	{
-		readonly VertexFactory vertexfactory = new VertexFactory (1.0e-5f);
-		readonly PlaneFactory planefactory = new PlaneFactory(1.0e-5f);
-		readonly Dictionary<string, PolygonShared> polygonsharedfactory = new Dictionary<string, PolygonShared>();
-
-		public PolygonShared GetPolygonShared(PolygonShared sourceshared)
-		{
-			var hash = sourceshared.Hash;
-			PolygonShared result;
-			if (polygonsharedfactory.TryGetValue(hash, out result))
-			{
-				return result;
-			}
-			else
-			{
-				polygonsharedfactory.Add(hash, sourceshared);
-				return sourceshared;
-			}
-		}
-
-		public Vertex GetVertex(Vertex sourcevertex)
-		{
-			var result = vertexfactory.LookupOrCreate(ref sourcevertex);
-			return result;
-		}
-
-		public Plane GetPlane(Plane sourceplane)
-		{
-			var result = planefactory.LookupOrCreate(sourceplane);
-			return result;
-		}
-
-		public Polygon GetPolygon(Polygon sourcepolygon)
-		{
-			var newplane = GetPlane(sourcepolygon.Plane);
-			var newshared = GetPolygonShared(sourcepolygon.Shared);
-			var newvertices = new List<Vertex>(sourcepolygon.Vertices);
-			for (int i = 0; i < newvertices.Count; i++)
-			{
-				newvertices[i] = GetVertex(newvertices[i]);
-			}
-			// two vertices that were originally very close may now have become
-			// truly identical (referring to the same CSG.Vertex object).
-			// Remove duplicate vertices:
-			var newvertices_dedup = new List<Vertex>();
-			if (newvertices.Count > 0)
-			{
-				var prevvertextag = newvertices[newvertices.Count - 1].Tag;
-				foreach (var vertex in newvertices) {
-					var vertextag = vertex.Tag;
-					if (vertextag != prevvertextag)
-					{
-						newvertices_dedup.Add(vertex);
-					}
-					prevvertextag = vertextag;
-				}
-			}
-			// If it's degenerate, remove all vertices:
-			if (newvertices_dedup.Count < 3)
-			{
-				newvertices_dedup = new List<Vertex>();
-			}
-			return new Polygon(newvertices_dedup, newshared, newplane);
-		}
-
-		public Solid GetCsg(Solid sourcecsg)
-		{
-			var newpolygons = new List<Polygon>();
-			foreach (var polygon in sourcecsg.Polygons)
-			{
-				var newpolygon = GetPolygon(polygon);
-				if (newpolygon.Vertices.Count >= 3)
-				{
-					newpolygons.Add(newpolygon);
-				}
-			}
-			return new Solid(newpolygons, false, false, copy: false);
-		}
-	}
-
-	class VertexFactory
-	{
-		static readonly KeyComparer keyComparer = new KeyComparer ();
-		readonly Dictionary<Key, Vertex> lookuptable = new Dictionary<Key, Vertex> (keyComparer);
-		readonly float multiplier;
-		public VertexFactory (float tolerance)
-		{
-			multiplier = 1.0f / tolerance;
-		}
-		public Vertex LookupOrCreate (ref Vertex vertex)
-		{
-			var key = new Key {
-				X = (int)(vertex.Pos.x * multiplier + 0.5),
-				Y = (int)(vertex.Pos.y * multiplier + 0.5),
-				Z = (int)(vertex.Pos.z * multiplier + 0.5),
-				U = (int)(vertex.Tex.x * multiplier + 0.5),
-				V = (int)(vertex.Tex.y * multiplier + 0.5),
-			};
-			if (lookuptable.TryGetValue (key, out var v))
-				return v;
-			lookuptable.Add (key, vertex);
-			return vertex;
-		}
-		struct Key
-		{
-			public int X, Y, Z, U, V;
-		}
-		class KeyComparer : IEqualityComparer<Key>
-		{
-			public bool Equals (Key x, Key y)
-			{
-				return x.X == y.X && x.Y == y.Y && x.Z == y.Z && x.U == y.U && x.V == y.V;
-			}
-
-			public int GetHashCode (Key k)
-			{
-				var hashCode = 1570706993;
-				hashCode = hashCode * -1521134295 + k.X.GetHashCode ();
-				hashCode = hashCode * -1521134295 + k.Y.GetHashCode ();
-				hashCode = hashCode * -1521134295 + k.Z.GetHashCode ();
-				hashCode = hashCode * -1521134295 + k.U.GetHashCode ();
-				hashCode = hashCode * -1521134295 + k.V.GetHashCode ();
-				return hashCode;
-			}
-		}
-	}
-
-	class PlaneFactory
-	{
-		static readonly KeyComparer keyComparer = new KeyComparer ();
-		readonly Dictionary<Key, Plane> lookuptable = new Dictionary<Key, Plane> (keyComparer);
-		readonly float multiplier;
-		public PlaneFactory (float tolerance)
-		{
-			multiplier = 1.0f / tolerance;
-		}
-		public Plane LookupOrCreate (Plane plane)
-		{
-			var key = new Key {
-				X = (int)(plane.Normal.x * multiplier + 0.5),
-				Y = (int)(plane.Normal.y * multiplier + 0.5),
-				Z = (int)(plane.Normal.z * multiplier + 0.5),
-				W = (int)(plane.W * multiplier + 0.5),
-			};
-			if (lookuptable.TryGetValue (key, out var p))
-				return p;
-			lookuptable.Add (key, plane);
-			return plane;
-		}
-		struct Key
-		{
-			public int X, Y, Z, W;
-		}
-		class KeyComparer : IEqualityComparer<Key>
-		{
-			public bool Equals (Key x, Key y)
-			{
-				return x.X == y.X && x.Y == y.Y && x.Z == y.Z && x.W == y.W;
-			}
-
-			public int GetHashCode (Key k)
-			{
-				var hashCode = 1570706993;
-				hashCode = hashCode * -1521134295 + k.X.GetHashCode ();
-				hashCode = hashCode * -1521134295 + k.Y.GetHashCode ();
-				hashCode = hashCode * -1521134295 + k.Z.GetHashCode ();
-				hashCode = hashCode * -1521134295 + k.W.GetHashCode ();
-				return hashCode;
-			}
 		}
 	}
 }
